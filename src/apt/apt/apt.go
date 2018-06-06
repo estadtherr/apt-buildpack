@@ -16,8 +16,8 @@ type Command interface {
 }
 
 type RepoPriority struct {
-	Repository: string
-	Priority:   string
+	Repository string
+	Priority   string
 }
 
 type Apt struct {
@@ -41,6 +41,8 @@ func New(command Command, aptFile, cacheDir, installDir string) *Apt {
 	sourceList := filepath.Join(cacheDir, "apt", "sources", "sources.list")
 	trustedKeys := filepath.Join(cacheDir, "apt", "etc", "trusted.gpg")
 	preferences := filepath.Join(cacheDir, "apt", "etc", "preferences")
+   fmt.Fprintf(os.Stdout, "sourceList: " + sourceList + "\npreferences: " + preferences + "\n")
+
 	return &Apt{
 		command:     command,
 		aptFilePath: aptFile,
@@ -48,6 +50,7 @@ func New(command Command, aptFile, cacheDir, installDir string) *Apt {
 		stateDir:    filepath.Join(cacheDir, "apt", "state"),
 		sourceList:  sourceList,
 		trustedKeys: trustedKeys,
+      preferences: preferences,
 		options: []string{
 			"-o", "debug::nolocking=true",
 			"-o", "dir::cache=" + filepath.Join(cacheDir, "apt", "cache"),
@@ -77,9 +80,19 @@ func (a *Apt) Setup() error {
 		return err
 	}
 
-	if err := libbuildpack.CopyFile("/etc/apt/preferences", a.preferences); err != nil {
-		return err
-	}
+   if exists, err := libbuildpack.FileExists("/etc/apt/preferences"); err != nil {
+      return err
+   } else if exists {
+	   if err := libbuildpack.CopyFile("/etc/apt/preferences", a.preferences); err != nil {
+		   return err
+	   }
+   } else {
+      dirPath := filepath.Dir(a.preferences)
+      err := os.MkdirAll(dirPath, 0755)
+      if err != nil {
+         return err
+      }
+   }
 
 	if err := libbuildpack.NewYAML().Load(a.aptFilePath, a); err != nil {
 		return err
@@ -117,19 +130,23 @@ func (a *Apt) AddRepos() error {
 			return err
 		}
 	}
+   output, err := a.command.Output("/", "cat", a.sourceList)
+   fmt.Fprintf(os.Stdout, "sources.list: %s\n", output)
 
-  if len(a.priorities) > 0 {
-		prefFile, err := os.OpenFile(a.sourceList, os.O_APPEND|os.O_WRONLY, 0600)
+  if len(a.Priorities) > 0 {
+		prefFile, err := os.OpenFile(a.preferences, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 		if err != nil {
 			return err
 		}
 		defer prefFile.Close()
 
-    for _, repoPriority := range a.Priorities {
-      if _, err = prefFile.WriteString("\nPackage: *\nPin: release a=" + repoPriority.Repository + "\nPin-Priority: " + repoPriority.Priority + "\n"); err != nil {
-				return err
-			}
-	  }
+      for _, repoPriority := range a.Priorities {
+         if _, err = prefFile.WriteString("\nPackage: *\nPin: release a=" + repoPriority.Repository + "\nPin-Priority: " + repoPriority.Priority + "\n"); err != nil {
+			   return err
+		   }
+	   }
+     output, err := a.command.Output("/", "cat", a.preferences)
+     fmt.Fprintf(os.Stdout, "preferences: %s\n", output)
 	}
 
 	return nil

@@ -51,6 +51,7 @@ var _ = Describe("Apt", func() {
 				"keys":                 []string{"https://example.com/public.key"},
 				"repos":                []string{"deb http://apt.example.com stable main"},
 				"packages":             []string{"abc", "def"},
+            "priorities":           map[string][]string{"repository": "stable", "priority": "101"},
 			})).To(Succeed())
 			Expect(a.Setup()).To(Succeed())
 		})
@@ -66,12 +67,18 @@ var _ = Describe("Apt", func() {
 		It("sets packages from apt.yml", func() {
 			Expect(a.Packages).To(Equal([]string{"abc", "def"}))
 		})
+      It("sets priorities from apt.yml", func() {
+         Expect(a.Priorities.To(Equal(map[string][]string{"repository": "stable", "priority": "101"})))
+      })
 		It("copies sources.list", func() {
 			Expect(filepath.Join(cacheDir, "apt", "sources", "sources.list")).To(BeARegularFile())
 		})
 		It("copies trusted.gpg", func() {
 			Expect(filepath.Join(cacheDir, "apt", "etc", "trusted.gpg")).To(BeARegularFile())
 		})
+      It("copies preferences", func() {
+         Expect(filepath.Join(cacheDir, "apt", "etc", "preferences")).To(BeARegularFile())
+      })
 	})
 
 	Describe("HasKeys", func() {
