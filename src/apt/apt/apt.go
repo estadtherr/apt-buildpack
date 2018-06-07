@@ -192,6 +192,7 @@ func (a *Apt) Install() (string, error) {
 	}
 
 	for _, file := range files {
+		fmt.Printf("installing " + filepath.Base(file) + "\n")
 		output, err := a.command.Output("/", "dpkg", "-x", file, a.installDir)
 		if err != nil {
          fmt.Printf("Error installing packages!\n" + output)
