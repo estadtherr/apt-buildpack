@@ -41,7 +41,6 @@ func New(command Command, aptFile, cacheDir, installDir string) *Apt {
 	sourceList := filepath.Join(cacheDir, "apt", "sources", "sources.list")
 	trustedKeys := filepath.Join(cacheDir, "apt", "etc", "trusted.gpg")
 	preferences := filepath.Join(cacheDir, "apt", "etc", "preferences")
-   fmt.Fprintf(os.Stdout, "sourceList: " + sourceList + "\npreferences: " + preferences + "\n")
 
 	return &Apt{
 		command:     command,
@@ -130,8 +129,6 @@ func (a *Apt) AddRepos() error {
 			return err
 		}
 	}
-   output, err := a.command.Output("/", "cat", a.sourceList)
-   fmt.Fprintf(os.Stdout, "sources.list: %s\n", output)
 
   if len(a.Priorities) > 0 {
 		prefFile, err := os.OpenFile(a.preferences, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
@@ -145,8 +142,6 @@ func (a *Apt) AddRepos() error {
 			   return err
 		   }
 	   }
-     output, err := a.command.Output("/", "cat", a.preferences)
-     fmt.Fprintf(os.Stdout, "preferences: %s\n", output)
 	}
 
 	return nil
@@ -185,7 +180,7 @@ func (a *Apt) Download() (string, error) {
 	if err != nil {
 		return output, err
 	}
-	fmt.Fprintf(os.Stdout, "output: %s\n", output)
+	fmt.Printf("%s\n", output)
 
 	return "", nil
 }
@@ -199,9 +194,9 @@ func (a *Apt) Install() (string, error) {
 	for _, file := range files {
 		output, err := a.command.Output("/", "dpkg", "-x", file, a.installDir)
 		if err != nil {
+         fmt.Printf("Error installing packages!\n" + output)
 			return output, err
 		}
-		fmt.Fprintf(os.Stdout, "output: %s\n", output)
 	}
 	return "", nil
 }
