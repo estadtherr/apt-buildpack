@@ -13,8 +13,6 @@ type Stager interface {
 	LinkDirectoryInDepDir(string, string) error
 	DepDir() string
 	CacheDir() string
-	DepsIdx() string
-	WriteProfileD(string, string) error
 }
 
 type Apt interface {
