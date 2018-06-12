@@ -49,7 +49,7 @@ func New(command Command, aptFile, cacheDir, installDir string) *Apt {
 		stateDir:    filepath.Join(cacheDir, "apt", "state"),
 		sourceList:  sourceList,
 		trustedKeys: trustedKeys,
-      preferences: preferences,
+		preferences: preferences,
 		options: []string{
 			"-o", "debug::nolocking=true",
 			"-o", "dir::cache=" + filepath.Join(cacheDir, "apt", "cache"),
@@ -79,19 +79,19 @@ func (a *Apt) Setup() error {
 		return err
 	}
 
-   if exists, err := libbuildpack.FileExists("/etc/apt/preferences"); err != nil {
-      return err
-   } else if exists {
-	   if err := libbuildpack.CopyFile("/etc/apt/preferences", a.preferences); err != nil {
-		   return err
-	   }
-   } else {
-      dirPath := filepath.Dir(a.preferences)
-      err := os.MkdirAll(dirPath, 0755)
-      if err != nil {
-         return err
-      }
-   }
+	if exists, err := libbuildpack.FileExists("/etc/apt/preferences"); err != nil {
+		return err
+	} else if exists {
+		if err := libbuildpack.CopyFile("/etc/apt/preferences", a.preferences); err != nil {
+			return err
+		}
+	} else {
+		dirPath := filepath.Dir(a.preferences)
+		err := os.MkdirAll(dirPath, 0755)
+		if err != nil {
+			return err
+		}
+	}
 
 	if err := libbuildpack.NewYAML().Load(a.aptFilePath, a); err != nil {
 		return err
@@ -130,18 +130,18 @@ func (a *Apt) AddRepos() error {
 		}
 	}
 
-  if len(a.Priorities) > 0 {
+	if len(a.Priorities) > 0 {
 		prefFile, err := os.OpenFile(a.preferences, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 		if err != nil {
 			return err
 		}
 		defer prefFile.Close()
 
-      for _, repoPriority := range a.Priorities {
-         if _, err = prefFile.WriteString("\nPackage: *\nPin: release a=" + repoPriority.Repository + "\nPin-Priority: " + repoPriority.Priority + "\n"); err != nil {
-			   return err
-		   }
-	   }
+		for _, repoPriority := range a.Priorities {
+			if _, err = prefFile.WriteString("\nPackage: *\nPin: release a=" + repoPriority.Repository + "\nPin-Priority: " + repoPriority.Priority + "\n"); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -195,7 +195,7 @@ func (a *Apt) Install() (string, error) {
 		fmt.Printf("installing " + filepath.Base(file) + "\n")
 		output, err := a.command.Output("/", "dpkg", "-x", file, a.installDir)
 		if err != nil {
-         fmt.Printf("Error installing packages!\n" + output)
+			fmt.Printf("Error installing packages!\n" + output)
 			return output, err
 		}
 	}

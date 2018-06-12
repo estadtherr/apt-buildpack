@@ -114,6 +114,9 @@ func (s *Supplier) createSymlinks() error {
 		}
 	}
 
+	// copy pkgconfig files instead of linking, then modify
+	// the copies to point to the DepDir-based path
+
 	for _, dirs := range [][]string{
 		{"usr/lib/i386-linux-gnu/pkgconfig", "pkgconfig"},
 		{"usr/lib/x86_64-linux-gnu/pkgconfig", "pkgconfig"},
