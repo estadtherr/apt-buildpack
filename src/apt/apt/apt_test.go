@@ -253,8 +253,8 @@ var _ = Describe("Apt", func() {
 				"-o", "dir::state="+cacheDir+"/apt/state",
 				"-o", "dir::etc::sourcelist="+cacheDir+"/apt/sources/sources.list",
 				"-o", "dir::etc::trusted="+cacheDir+"/apt/etc/trusted.gpg",
-				"-y", "--force-yes", "-d", "install", "--reinstall",
 				"-o", "Dir::Etc::preferences="+cacheDir+"/apt/etc/preferences",
+				"-y", "--force-yes", "-d", "install", "--reinstall",
 				"foo",
 				"bar",
 			).Return("apt output", nil)
