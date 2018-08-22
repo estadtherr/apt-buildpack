@@ -6,11 +6,3 @@ Components: main
 Description: Fake debian package repo
 SignWith: yes
 Pull: trusty
-
-Origin: apt.example.com
-Label: apt backports repository
-Codename: trusty-backports
-Architectures: amd64 source
-Components: main
-Description: Fake debian backports package repo
-Pull: trusty-backports
